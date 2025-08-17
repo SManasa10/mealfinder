@@ -150,10 +150,50 @@
             `;
             card.querySelector("button").onclick = () => loadMealDetails(meal.idMeal, category);
             mealsContainer.appendChild(card);
+        
           });
         });
     }
+    // Load Meal Details
+    function loadMealDetails(id, category) {
+      fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`)
+        .then(res => res.json())
+        .then(data => {
+          const meal = data.meals[0];
+          let ingredientsHTML = "";
+          for (let i = 1; i <= 20; i++) {
+            const ingredient = meal[`strIngredient${i}`];
+            const measure = meal[`strMeasure${i}`];
+            if (ingredient && ingredient.trim() !== "") {
+              ingredientsHTML += `
+                <li class="flex justify-between border-b py-1">
+                  <span>${ingredient}</span>
+                  <span class="text-gray-600">${measure}</span>
+                </li>
+              `;
+            }
+          }
 
+          categoryDescription.innerHTML = "";
+          mealsContainer.innerHTML = `
+            <div class="col-span-full bg-white shadow rounded-lg p-6">
+              <button onclick="loadCategory('${category}')" class="mb-4 bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">
+                ← Back
+              </button>
+              <h2 class="text-2xl font-bold mb-4 text-orange-600">${meal.strMeal}</h2>
+              <img src="${meal.strMealThumb}" class="w-full max-w-lg rounded mb-4"/>
+              <p><strong>Category:</strong> ${meal.strCategory}</p>
+              <p><strong>Area:</strong> ${meal.strArea}</p>
+
+              <h3 class="mt-4 font-semibold text-lg">Ingredients</h3>
+              <ul class="mt-2 mb-4">${ingredientsHTML}</ul>
+
+              <h3 class="mt-4 font-semibold text-lg">Instructions</h3>
+              <p class="mt-2 text-gray-700 leading-relaxed whitespace-pre-line">${meal.strInstructions}</p>
+            </div>
+          `;
+        });
+    }
     
   </script>
 </body>
