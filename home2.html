@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meal Finder</title>
+
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <style>
+   
+    #sideMenu {
+      transition: right 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <nav class="bg-orange-600 text-white px-6 py-3 flex justify-between items-center">
+    <div class="flex items-center space-x-2">
+      <i class="bi bi-house-door-fill"></i>
+      <span class="font-bold text-lg">MEAL FINDER</span>
+    </div>
+    <button id="menuBtn" class="text-white text-2xl">
+      <i class="bi bi-list"></i>
+    </button>
+  </nav>
+
+  <div id="sideMenu" class="fixed top-0 -right-64 flex-col bg-white w-64 h-full shadow-lg p-5 overflow-y-auto z-50">
+    <div class="flex justify-between items-center border-b pb-2">
+      <span class="text-lg font-bold">Categories</span>
+      <button id="closeMenu" class="text-red-500 text-xl">
+        <i class="bi bi-x-circle"></i>
+      </button>
+    </div>
+    <ul id="categoriesMenu" class="mt-4 space-y-2"></ul>
+  </div>
+
+  
+  <section class="relative bg-cover bg-center h-64" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836');">
+    <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-center text-white">
+      <div class="flex bg-white rounded-full overflow-hidden">
+        <input id="searchInput" type="text" placeholder="Search recipes here ..." class="px-4 py-2 w-64 text-gray-800 outline-none">
+        <button id="searchBtn" class="bg-orange-500 px-4 flex items-center justify-center text-white">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+      <h2 class="mt-4 text-2xl font-bold">What are your favorite cuisines?</h2>
+      <p class="text-sm">PERSONALIZE YOUR EXPERIENCE</p>
+    </div>
+  </section>
+
+ 
+  <section id="homeSection" class="px-6 py-8">
+    <h3 class="text-lg font-bold mb-4 flex items-center">
+      CATEGORIES
+      <span class="ml-2 border-b-4 border-orange-500 w-10"></span>
+    </h3>
+    <div id="categoriesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6"></div>
+  </section>
+
+ 
+  <section id="categorySection" class="px-6 py-8 hidden">
+    <div id="categoryDescription" class="mb-6"></div>
+    <div id="mealsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+  </section>
+
+  
+  <script>
+    const categoriesMenu = document.getElementById("categoriesMenu");
+    const categoriesGrid = document.getElementById("categoriesGrid");
+    const sideMenu = document.getElementById("sideMenu");
+    const menuBtn = document.getElementById("menuBtn");
+    const closeMenu = document.getElementById("closeMenu");
+    const homeSection = document.getElementById("homeSection");
+    const categorySection = document.getElementById("categorySection");
+    const categoryDescription = document.getElementById("categoryDescription");
+    const mealsContainer = document.getElementById("mealsContainer");
+
+   
+    menuBtn.addEventListener("click", () => {
+      sideMenu.classList.remove("-right-64");
+      sideMenu.classList.add("right-0");
+    });
+    closeMenu.addEventListener("click", () => {
+      sideMenu.classList.remove("right-0");
+      sideMenu.classList.add("-right-64");
+    });
+
+    
+    fetch("https://www.themealdb.com/api/json/v1/1/categories.php")
+      .then(res => res.json())
+      .then(data => {
+        data.categories.forEach(cat => {
+          // Side Menu List
+          const li = document.createElement("li");
+          li.textContent = cat.strCategory;
+          li.className = "cursor-pointer border-b pb-1 hover:text-orange-500";
+          li.onclick = () => loadCategory(cat.strCategory);
+          categoriesMenu.appendChild(li);
+
+          // Grid Items
+          const card = document.createElement("div");
+          card.className = "bg-white shadow rounded overflow-hidden cursor-pointer hover:shadow-lg";
+          card.innerHTML = `
+            <img src="${cat.strCategoryThumb}" class="w-full h-32 object-cover">
+            <div class="p-2 flex justify-between items-center">
+              <span class="font-bold">${cat.strCategory}</span>
+              <span class="bg-orange-500 text-white text-xs px-2 py-1 rounded">${cat.strCategory}</span>
+            </div>
+          `;
+          card.onclick = () => loadCategory(cat.strCategory);
+          categoriesGrid.appendChild(card);
+        });
+      });
+
+    // Load Category
+    function loadCategory(category) {
+      homeSection.classList.add("hidden");
+      categorySection.classList.remove("hidden");
+
+      fetch("https://www.themealdb.com/api/json/v1/1/categories.php")
+        .then(res => res.json())
+        .then(data => {
+          const cat = data.categories.find(c => c.strCategory === category);
+          categoryDescription.innerHTML = `
+            <div class="bg-white shadow rounded p-4">
+              <h2 class="text-2xl font-bold text-orange-600">${cat.strCategory}</h2>
+              <p class="mt-2 text-gray-700">${cat.strCategoryDescription}</p>
+            </div>
+          `;
+        });
+
+      fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`)
+        .then(res => res.json())
+        .then(data => {
+          mealsContainer.innerHTML = "";
+          data.meals.forEach(meal => {
+            const card = document.createElement("div");
+            card.className = "bg-white shadow rounded overflow-hidden";
+            card.innerHTML = `
+              <img src="${meal.strMealThumb}" class="w-full h-40 object-cover">
+              <div class="p-4">
+                <h3 class="font-bold">${meal.strMeal}</h3>
+                <button class="mt-2 bg-orange-500 text-white px-3 py-1 rounded text-sm">View Details</button>
+              </div>
+            `;
+            card.querySelector("button").onclick = () => loadMealDetails(meal.idMeal, category);
+            mealsContainer.appendChild(card);
+          });
+        });
+    }
+
+    // Load Meal Details
+    function loadMealDetails(id, category) {
+      fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`)
+        .then(res => res.json())
+        .then(data => {
+          const meal = data.meals[0];
+          let ingredientsHTML = "";
+          for (let i = 1; i <= 20; i++) {
+            const ingredient = meal[`strIngredient${i}`];
+            const measure = meal[`strMeasure${i}`];
+            if (ingredient && ingredient.trim() !== "") {
+              ingredientsHTML += `
+                <li class="flex justify-between border-b py-1">
+                  <span>${ingredient}</span>
+                  <span class="text-gray-600">${measure}</span>
+                </li>
+              `;
+            }
+          }
+
+          categoryDescription.innerHTML = "";
+          mealsContainer.innerHTML = `
+            <div class="col-span-full bg-white shadow rounded-lg p-6">
+              <button onclick="loadCategory('${category}')" class="mb-4 bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">
+                ← Back
+              </button>
+              <h2 class="text-2xl font-bold mb-4 text-orange-600">${meal.strMeal}</h2>
+              <img src="${meal.strMealThumb}" class="w-full max-w-lg rounded mb-4"/>
+              <p><strong>Category:</strong> ${meal.strCategory}</p>
+              <p><strong>Area:</strong> ${meal.strArea}</p>
+
+              <h3 class="mt-4 font-semibold text-lg">Ingredients</h3>
+              <ul class="mt-2 mb-4">${ingredientsHTML}</ul>
+
+              <h3 class="mt-4 font-semibold text-lg">Instructions</h3>
+              <p class="mt-2 text-gray-700 leading-relaxed whitespace-pre-line">${meal.strInstructions}</p>
+            </div>
+          `;
+        });
+    }
+  </script>
+</body>
+</html>
