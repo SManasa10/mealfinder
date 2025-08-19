@@ -5,395 +5,160 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Meal Finder</title>
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"/>
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <style>
-    html { scroll-behavior: smooth; }
-    body { padding-top: 70px; } /* Space for fixed navbar */
-    #sideMenu { transition: right 0.3s ease-in-out; right: -16rem; }
-    :root { --thick-orange: #FF6600; }
-
-    /* Ingredients container */
-    .ingredients-container {
-      background-color: rgb(255, 98, 0);
-      width: 100%;
-      max-width: 500px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr); 
-      gap: 8px; 
-      padding: 10px;
-      border-radius: 8px;
+    /* Sidebar */
+    #sideMenu {
+      transition: right 0.3s ease-in-out;
+      right: -16rem;
     }
-
-    .ingredients-container h4 { grid-column: span 3; color: white; }
-    .ingredient-item {
-      background-color: rgb(255, 98, 0);
-      color: white;
-      border-radius: 5px;
-      padding: 5px 8px;
-      font-size: 14px;
+    /* Auto numbering for ingredients */
+    .ingredients-list {
+      counter-reset: ingredient-counter;
     }
-
-    /* Measures container */
-    .measures-container {
-      width: 80%;
-      margin: 20px auto;
-      background-color: lightblue;
-      border-radius: 8px;
-      padding: 10px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+    .ingredients-list li {
+      counter-increment: ingredient-counter;
     }
-    .measure-item {
-      display: flex;
-      align-items: center;
-      background-color: lightblue;
-      padding: 6px 5px;
-      border-radius: 6px;
-      font-size: 14px;
-      color: black;
-    }
-    .measure-item i { margin-right: 5px; }
-
-    #heroSection {
-      position: relative;
-      height: 16rem;
-      background-size: cover;
-      background-position: center;
-    }
-    #heroOverlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
+    .ingredients-list li::before {
+      content: counter(ingredient-counter);
+      display: inline-flex;
       justify-content: center;
       align-items: center;
-      text-align: center;
-      color: white;
-    }
-
-    #mealDetails img { max-width: 100%; border-radius: 0.5rem; }
-    .cursor-pointer { cursor: pointer; }
-
-    #mealDetailsSection { margin-top: 2rem; }
-    #mealDetailsContainer { width: 90%; margin: 0 auto; }
-
-    #mealHeader {
-      background-color: var(--thick-orange);
-      color: white;
-      border-radius: 5px;
-      padding: 0.75rem 1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .custom-col-5 {
-      flex: 0 0 20%;
-      max-width: 20%;
-    }
-
-    /* Category card hover effect */
-    #categoriesGrid .card,
-    #categoriesGridUnderMeal .card {
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    #categoriesGrid .card:hover,
-    #categoriesGridUnderMeal .card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #00bcd4;
+      color: #fff;
+      font-size: 13px;
+      font-weight: bold;
+      margin-right: 10px;
     }
   </style>
 </head>
-<body class="bg-light">
+<body class="bg-gray-100">
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark fixed-top px-4" style="background-color: #FF6600; z-index: 1100;">
-    <div class="container-fluid d-flex justify-content-between">
-      <div class="d-flex align-items-center gap-2">
-        <i class="bi bi-house-door-fill text-white"></i>
-        <span class="fw-bold fs-5 text-white">MEAL FINDER</span>
-      </div>
-      <button id="menuBtn" class="btn text-white fs-3">
-        <i class="bi bi-list"></i>
-      </button>
-    </div>
+  <nav class="bg-orange-500 text-white p-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold">Meal Finder</h1>
+    <button id="menuBtn"><i class="bi bi-list text-2xl"></i></button>
   </nav>
 
-  <!-- Side Menu -->
-  <div id="sideMenu" class="position-fixed top-0 bg-white shadow h-100 p-4 overflow-auto" style="width:16rem; z-index:1050;">
-    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-      <span class="fs-5 fw-bold">Menu</span>
-      <button id="closeMenu" class="btn text-danger fs-4"><i class="bi bi-x-circle"></i></button>
-    </div>
-    <ul id="categoriesMenu" class="list-unstyled mb-3"></ul>
+  <!-- Sidebar -->
+  <aside id="sideMenu" class="fixed top-0 bg-white w-64 h-full shadow-lg p-4 z-50">
+    <button id="closeBtn" class="text-gray-600 text-xl mb-4"><i class="bi bi-x-lg"></i></button>
+    <h2 class="text-lg font-bold mb-2">Categories</h2>
+    <ul id="categories" class="space-y-2"></ul>
+  </aside>
+
+  <!-- Search -->
+  <div class="p-4">
+    <input id="searchInput" type="text" placeholder="Search meal..." 
+           class="border p-2 w-full rounded mb-4">
+    <div id="meals" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   </div>
 
-  <!-- Hero Section -->
-  <section id="heroSection" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836');">
-    <div id="heroOverlay">
-      <div class="input-group rounded overflow-hidden mb-3" style="max-width:22rem;">
-        <input id="searchInput" type="text" class="form-control" placeholder="Search recipes here ..."/>
-        <button id="searchBtn" class="btn btn-warning"><i class="bi bi-search"></i></button>
-      </div>
-      <h2 class="fs-4 fw-bold">What are your favorite cuisines?</h2>
-      <p class="small">PERSONALIZE YOUR EXPERIENCE</p>
-    </div>
-  </section>
-
-  <!-- Categories Section (Home Page) -->
-  <section id="homeSection" class="container py-4">
-    <h3 class="fs-5 fw-bold mb-3">Categories</h3>
-    <hr class="border-warning border-2 w-25 mb-4">
-    <div id="categoriesGrid" class="row g-3"></div>
-  </section>
-
-  <!-- Meals Section -->
-  <section id="categorySection" class="container py-4 d-none">
-    <div id="categoryDescription" class="mb-4"></div>
-    <h3 class="fs-5 fw-bold mb-3">Meals</h3>
-    <hr class="border-warning border-2 w-25 mb-4">
-    <div id="mealsContainer" class="row g-3"></div>
-  </section>
-
   <!-- Meal Details -->
-  <section id="mealDetailsSection" class="container py-4 d-none">
-    <div id="mealHeader">
-      <i id="homeIcon" class="bi bi-house-fill fs-3 cursor-pointer"></i>
-      <h2 id="mealTitle" class="fs-4 fw-bold m-0"></h2>
-    </div>
-    <div id="mealDetailsContainer">
-      <div id="mealDetails"></div>
-    </div>
-
-    <!-- Categories under Meal Instructions -->
-    <div class="mt-5">
-      <h3 class="fs-5 fw-bold mb-3"> Categories</h3>
-      <hr class="border-warning border-2 w-25 mb-4">
-      <div id="categoriesGridUnderMeal" class="row g-3"></div>
-    </div>
-  </section>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <div id="mealDetails" class="p-4 hidden"></div>
 
   <script>
-    const categoriesMenu = document.getElementById("categoriesMenu");
-    const categoriesGrid = document.getElementById("categoriesGrid");
-    const categoriesGridUnderMeal = document.getElementById("categoriesGridUnderMeal");
-    const sideMenu = document.getElementById("sideMenu");
     const menuBtn = document.getElementById("menuBtn");
-    const closeMenu = document.getElementById("closeMenu");
-    const homeSection = document.getElementById("homeSection");
-    const categorySection = document.getElementById("categorySection");
-    const categoryDescription = document.getElementById("categoryDescription");
-    const mealsContainer = document.getElementById("mealsContainer");
-    const mealDetailsSection = document.getElementById("mealDetailsSection");
-    const mealDetails = document.getElementById("mealDetails");
+    const closeBtn = document.getElementById("closeBtn");
+    const sideMenu = document.getElementById("sideMenu");
+    const categoriesEl = document.getElementById("categories");
+    const mealsEl = document.getElementById("meals");
+    const searchInput = document.getElementById("searchInput");
+    const mealDetailsEl = document.getElementById("mealDetails");
 
-    menuBtn.addEventListener("click", () => sideMenu.style.right = "0");
-    closeMenu.addEventListener("click", () => sideMenu.style.right = "-16rem");
+    // Sidebar toggle
+    menuBtn.onclick = () => sideMenu.style.right = "0";
+    closeBtn.onclick = () => sideMenu.style.right = "-16rem";
 
-    async function loadCategories() {
-      const res = await fetch("https://www.themealdb.com/api/json/v1/1/categories.php");
-      const data = await res.json();
-      categoriesMenu.innerHTML = "";
-      categoriesGrid.innerHTML = "";
-      categoriesGridUnderMeal.innerHTML = "";
-
-      data.categories.forEach(cat => {
-        // Side Menu
-        const li = document.createElement("li");
-        li.textContent = cat.strCategory;
-        li.className = "cursor-pointer border-bottom pb-1 mb-1";
-        li.onclick = () => loadCategory(cat.strCategory);
-        categoriesMenu.appendChild(li);
-
-        // Category Card (Home)
-        const cardHome = document.createElement("div");
-        cardHome.className = "col-6 col-sm-4 col-md-3";
-        cardHome.innerHTML = `
-         <div class="card shadow-sm h-100 cursor-pointer position-relative">
-          <img src="${cat.strCategoryThumb}" class="card-img-top" alt="${cat.strCategory}" />
-          <span class="fw-bold" 
-            style="position: absolute; background-color: orange; color: white; padding: 2px 5px; top: 10px; right: 10px; border-radius: 4px;">
-            ${cat.strCategory}
-          </span>
-        </div>
-        `;
-        cardHome.querySelector("div").onclick = () => loadCategory(cat.strCategory);
-        categoriesGrid.appendChild(cardHome);
-
-        // Category Card (Under Meal)
-        const cardMeal = cardHome.cloneNode(true);
-        cardMeal.querySelector("div").onclick = () => loadCategory(cat.strCategory);
-        categoriesGridUnderMeal.appendChild(cardMeal);
+    // Fetch categories
+    fetch("https://www.themealdb.com/api/json/v1/1/categories.php")
+      .then(res => res.json())
+      .then(data => {
+        data.categories.forEach(cat => {
+          const li = document.createElement("li");
+          li.className = "cursor-pointer hover:text-orange-500";
+          li.textContent = cat.strCategory;
+          li.onclick = () => fetchMealsByCategory(cat.strCategory);
+          categoriesEl.appendChild(li);
+        });
       });
-    }
 
-    async function loadCategory(category) {
-      homeSection.classList.add("d-none");
-      categorySection.classList.remove("d-none");
-      mealDetailsSection.classList.add("d-none");
-
-      const res = await fetch("https://www.themealdb.com/api/json/v1/1/categories.php");
-      const data = await res.json();
-      const cat = data.categories.find(c => c.strCategory === category);
-      if (cat) {
-        categoryDescription.innerHTML = `
-          <div class="card p-3 mb-3 shadow-sm">
-            <h2 class="text-warning fw-bold">${cat.strCategory}</h2>
-            <p>${cat.strCategoryDescription}</p>
-          </div>
-        `;
+    // Search meal
+    searchInput.onkeyup = () => {
+      const query = searchInput.value.trim();
+      if (query.length > 2) {
+        fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${query}`)
+          .then(res => res.json())
+          .then(data => displayMeals(data.meals || []));
       }
+    };
 
-      const resMeals = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${encodeURIComponent(category)}`);
-      const mealsData = await resMeals.json();
-      mealsContainer.innerHTML = "";
-      (mealsData.meals || []).forEach(meal => {
-        const card = document.createElement("div");
-        card.className = "custom-col-5";
-        card.innerHTML = `
-          <div class="card shadow-sm h-100 cursor-pointer">
-            <img src="${meal.strMealThumb}" class="card-img-top" alt="${meal.strMeal}" width="200px" height="300px" style="object-fit: cover;"/>
-            <div class="card-body p-2">
-              <p class="fw-bold">${meal.strMeal}</p>
-            </div>
-          </div>
+    // Fetch meals by category
+    function fetchMealsByCategory(category) {
+      fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`)
+        .then(res => res.json())
+        .then(data => displayMeals(data.meals || []));
+    }
+
+    // Display meals
+    function displayMeals(meals) {
+      mealsEl.innerHTML = "";
+      mealDetailsEl.classList.add("hidden");
+      meals.forEach(meal => {
+        const div = document.createElement("div");
+        div.className = "bg-white rounded shadow overflow-hidden cursor-pointer hover:shadow-lg";
+        div.innerHTML = `
+          <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="w-full h-32 object-cover">
+          <h3 class="p-2 text-center font-bold">${meal.strMeal}</h3>
         `;
-        card.querySelector("img").onclick = () => loadMealDetails(meal.idMeal);
-        mealsContainer.appendChild(card);
+        div.onclick = () => fetchMealDetails(meal.idMeal);
+        mealsEl.appendChild(div);
       });
     }
 
-    function buildInstructionPoints(text) {
-      if (!text) return [];
-      const raw = text.split(/\r?\n+/).flatMap(line => line.split(/\. (?=[A-Z])/));
-      return raw.map(s => s.replace(/\s+/g, " ").trim()).filter(s => s.length > 2);
+    // Fetch meal details
+    function fetchMealDetails(id) {
+      fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`)
+        .then(res => res.json())
+        .then(data => displayMealDetails(data.meals[0]));
     }
 
-    async function loadMealDetails(id) {
-      homeSection.classList.add("d-none");
-      categorySection.classList.add("d-none");
-      mealDetailsSection.classList.remove("d-none");
+    // Display meal details with ingredients auto-numbering
+    function displayMealDetails(meal) {
+      mealsEl.innerHTML = "";
+      mealDetailsEl.classList.remove("hidden");
 
-      const res = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
-      const data = await res.json();
-      const meal = data.meals?.[0];
-      if (!meal) return;
-
-      document.getElementById("mealTitle").textContent = meal.strMeal;
-
-      let ingredientsHTML = "";
-      let measuresHTML = "";
+      // Collect ingredients
+      let ingredients = "";
       for (let i = 1; i <= 20; i++) {
-        const ingredient = meal[`strIngredient${i}`];
+        const ing = meal[`strIngredient${i}`];
         const measure = meal[`strMeasure${i}`];
-        if (ingredient && ingredient.trim() !== "") {
-          ingredientsHTML += `<div class="ingredient-item">${ingredient}</div>`;
-          measuresHTML += `<div class="measure-item"><i class="fa fa-utensil-spoon" style="color: red;"></i> ${measure || ""} ${ingredient}</div>`;
+        if (ing && ing.trim()) {
+          ingredients += `<li class="flex items-center">${ing} - ${measure}</li>`;
         }
       }
 
-      const steps = buildInstructionPoints(meal.strInstructions);
-      const instructionsHTML = steps.map(s => `
-        <li class="d-flex align-items-start gap-2 mb-1">
-          <span class="d-flex justify-content-center align-items-center rounded-circle" style="width:24px;height:24px;color: orange;">
-            <i class="fa-regular fa-square-check"></i>
-          </span>
-          <span>${s}</span>
-        </li>`).join("");
+      mealDetailsEl.innerHTML = `
+        <div class="bg-white rounded shadow p-4">
+          <h2 class="text-2xl font-bold mb-2">${meal.strMeal}</h2>
+          <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="w-full rounded mb-4">
+          <h3 class="text-lg font-semibold mb-2">Instructions</h3>
+          <p class="mb-4">${meal.strInstructions}</p>
 
-      const srcLink = meal.strSource 
-        ? `<a href="${meal.strSource}" target="_blank" class="text-primary text-decoration-none">${meal.strSource}</a>`
-        : `<span class="text-muted">Source: Not available</span>`;
-
-      mealDetails.innerHTML = `
-        <div class="row g-3">
-          <div class="col-12 col-lg-6 text-center">
-            <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="img-fluid" />
+          <div class="bg-orange-500 text-white p-4 rounded-lg shadow">
+            <h3 class="text-lg font-bold text-center mb-3">Ingredients</h3>
+            <ul class="ingredients-list space-y-2">${ingredients}</ul>
           </div>
-          <div class="col-12 col-lg-6">
-            <h3 class="fw-bold mb-2" 
-              style="display: inline-block; color: orange; padding: 4px 8px; border-radius: 4px; border-bottom: 3px solid orange;">
-              ${meal.strMeal}
-            </h3>
-            <p><strong>Category:</strong> ${meal.strCategory || "—"}</p>
-            <p>
-              <strong>Tags:</strong> 
-              <span style="border: 1px solid orange; padding: 2px 5px; display: inline-block;">
-                ${meal.strTags || "None"}
-              </span>
-            </p>
-            <p><strong>Area:</strong> ${meal.strArea || "—"}</p>
-            <p><strong>Source:</strong> ${srcLink}</p>
-            <div class="ingredients-container mt-3">
-              <h4>Ingredients</h4>
-              ${ingredientsHTML}
-            </div>
-          </div>
-          <h3>Measures</h3>
-          <div class="measures-container mt-3">${measuresHTML}</div>
-        </div>
-        <div class="mt-4">
-          <h4 class="fw-semibold">Instructions</h4>
-          <ul class="list-unstyled mt-2">${instructionsHTML}</ul>
         </div>
       `;
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-
-    document.getElementById("homeIcon").addEventListener("click", () => {
-      mealDetailsSection.classList.add("d-none");
-      homeSection.classList.remove("d-none");
-      categorySection.classList.add("d-none");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-
-    async function searchMeal() {
-      const query = document.getElementById("searchInput").value.trim();
-      if (!query) return;
-      homeSection.classList.add("d-none");
-      categorySection.classList.remove("d-none");
-      mealDetailsSection.classList.add("d-none");
-      mealsContainer.innerHTML = "";
-
-      const res = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      if (!data.meals) {
-        mealsContainer.innerHTML = `<div class="alert alert-warning">No results found for "${query}"</div>`;
-        return;
-      }
-      data.meals.forEach(meal => {
-        const card = document.createElement("div");
-        card.className = "col-12 col-sm-6 col-md-4";
-        card.innerHTML = `
-          <div class="card shadow-sm h-100 cursor-pointer">
-            <img src="${meal.strMealThumb}" class="card-img-top" alt="${meal.strMeal}"/>
-            <div class="card-body p-2">
-              <h5 class="fw-bold">${meal.strMeal}</h5>
-            </div>
-          </div>
-        `;
-        card.querySelector("img").onclick = () => loadMealDetails(meal.idMeal);
-        mealsContainer.appendChild(card);
-      });
-    }
-
-    document.getElementById("searchBtn").addEventListener("click", searchMeal);
-    document.getElementById("searchInput").addEventListener("keypress", e => { if(e.key === "Enter") searchMeal(); });
-
-    loadCategories();
   </script>
 </body>
 </html>
