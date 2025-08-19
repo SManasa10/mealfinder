@@ -52,13 +52,9 @@
 .ingredients-container {
   counter-reset: ingredient-counter;
 }
-.ingredients-container h4 {grid-column: span3;
-color: white;
-}
-
 .ingredient-item {
   position: relative;
-  padding-left: 32px; /* space for number */
+  padding-left: 32px; 
 }
 
 .ingredient-item::before {
@@ -79,6 +75,56 @@ color: white;
   justify-content: center;
   font-size: 13px;
 }
+.ingredients-box {
+  background: orange;
+  padding: 15px;
+  border-radius: 10px;
+  color: white;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.ingredients-title {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 18px;
+  display: block;
+  width: 100%;
+}
+
+.ingredients-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  counter-reset: ingredient-counter;
+}
+
+.ingredient-item {
+  position: relative;
+  padding-left: 35px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.ingredient-item::before {
+  counter-increment: ingredient-counter;
+  content: counter(ingredient-counter);
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #00b894; 
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
 
     /* Measures container */
     .measures-container { width: 80%; margin: 20px auto; background-color: lightblue; border-radius: 8px; padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
